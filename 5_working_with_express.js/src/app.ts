@@ -1,8 +1,26 @@
-import * as http from "http";
 import * as express from "express";
+import * as bodyParser from "body-parser";
+import * as path from "path";
+
+import { Middleware } from "./typing";
+import rootDir from "./utils/rootDir";
+
+import adminRouter from "./routes/admin";
+import shopRouter from "./routes/shop";
 
 const app = express();
 
-const server = http.createServer(app);
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(rootDir, "public")));
 
-server.listen(3000);
+app.use("/admin", adminRouter);
+app.use(shopRouter);
+
+app.use(
+  (req, res, next): Middleware => {
+    res.status(404).sendFile(path.join(rootDir, "views", "404.html"));
+    return;
+  }
+);
+
+app.listen(3000);
